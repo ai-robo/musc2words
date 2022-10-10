@@ -30,23 +30,27 @@ void MainWindow::on_actionCOM_triggered() {
     connect(&m_thread, &ReceiverThread::error, this, &MainWindow::processError);
     connect(&m_thread, &ReceiverThread::timeout, this,
             &MainWindow::processTimeout);
-    m_buttonsVector = {{ui->pushButton_A, "А"},   {ui->pushButton_B, "Б"},
-                       {ui->pushButton_V, "В"},   {ui->pushButton_G, "Г"},
-                       {ui->pushButton_D, "Д"},   {ui->pushButton_E, "Е"},
-                       {ui->pushButton_YO, "Ё"},  {ui->pushButton_ZH, "Ж"},
-                       {ui->pushButton_Z, "З"},   {ui->pushButton_I, "И"},
-                       {ui->pushButton_Y, "Й"},   {ui->pushButton_K, "К"},
-                       {ui->pushButton_L, "Л"},   {ui->pushButton_M, "М"},
-                       {ui->pushButton_N, "Н"},   {ui->pushButton_O, "О"},
-                       {ui->pushButton_P, "П"},   {ui->pushButton_R, "Р"},
-                       {ui->pushButton_S, "С"},   {ui->pushButton_T, "Т"},
-                       {ui->pushButton_U, "У"},   {ui->pushButton_F, "Ф"},
-                       {ui->pushButton_H, "Х"},   {ui->pushButton_TS, "Ц"},
-                       {ui->pushButton_CH, "Ч"},  {ui->pushButton_SH, "Ш"},
-                       {ui->pushButton_SH2, "Щ"}, {ui->pushButton_TV, "Ъ"},
-                       {ui->pushButton_IY, "Ы"},  {ui->pushButton_MZ, "Ь"},
-                       {ui->pushButton_EE, "Э"},  {ui->pushButton_UU, "Ю"},
-                       {ui->pushButton_YA, "Я"}};
+    m_buttonsVector = {
+        {ui->pushButton_A, "А"},        {ui->pushButton_B, "Б"},
+        {ui->pushButton_V, "В"},        {ui->pushButton_G, "Г"},
+        {ui->pushButton_D, "Д"},        {ui->pushButton_E, "Е"},
+        {ui->pushButton_YO, "Ё"},       {ui->pushButton_ZH, "Ж"},
+        {ui->pushButton_Z, "З"},        {ui->pushButton_I, "И"},
+        {ui->pushButton_Y, "Й"},        {ui->pushButton_K, "К"},
+        {ui->pushButton_L, "Л"},        {ui->pushButton_M, "М"},
+        {ui->pushButton_N, "Н"},        {ui->pushButton_O, "О"},
+        {ui->pushButton_P, "П"},        {ui->pushButton_R, "Р"},
+        {ui->pushButton_S, "С"},        {ui->pushButton_T, "Т"},
+        {ui->pushButton_U, "У"},        {ui->pushButton_F, "Ф"},
+        {ui->pushButton_H, "Х"},        {ui->pushButton_TS, "Ц"},
+        {ui->pushButton_CH, "Ч"},       {ui->pushButton_SH, "Ш"},
+        {ui->pushButton_SH2, "Щ"},      {ui->pushButton_TV, "Ъ"},
+        {ui->pushButton_IY, "Ы"},       {ui->pushButton_MZ, "Ь"},
+        {ui->pushButton_EE, "Э"},       {ui->pushButton_UU, "Ю"},
+        {ui->pushButton_YA, "Я"},       {ui->pushButton_TCHK, "."},
+        {ui->pushButton_ZPT, ","},      {ui->pushButton_VSKL, "!"},
+        {ui->pushButton_VOPR, "?"},     {ui->pushButton_SMILE, ":-)"},
+        {ui->pushButton_SADNES, ":-("}, {ui->pushButton_BKSPS, " "}};
     m_thread.startReceiver(port_name, 10000);
   }
 }
@@ -55,30 +59,44 @@ void MainWindow::startReceiver() {}
 
 void MainWindow::showRequest(const QString& s) {
   static int letter_num = 0;
+  const int max_letter_num = 39;
   // qDebug() << s;
   if (s == "set") {
     qDebug() << letter_num;
     qDebug() << m_buttonsVector.at(letter_num).second;
     ui->lineEdit->setText(ui->lineEdit->text() +
                           m_buttonsVector.at(letter_num).second);
-  } else {
+  } else if (s == "clr") {
+    ui->lineEdit->setText("");
+  } else if (s == "inc") {
     letter_num++;
     qDebug() << letter_num;
-    if (letter_num > 32) {
+    if (letter_num > max_letter_num) {
       letter_num = 0;
       m_buttonsVector.at(letter_num).first->setEnabled(true);
-      m_buttonsVector.at(32).first->setEnabled(false);
+      m_buttonsVector.at(max_letter_num).first->setEnabled(false);
       m_buttonsVector.at(1).first->setEnabled(false);
-    } else if (letter_num == 32) {
+    } else if (letter_num == max_letter_num) {
       m_buttonsVector.at(letter_num).first->setEnabled(true);
-      m_buttonsVector.at(31).first->setEnabled(false);
+      m_buttonsVector.at(max_letter_num - 1).first->setEnabled(false);
     } else if (letter_num == 0) {
       m_buttonsVector.at(letter_num).first->setEnabled(true);
       m_buttonsVector.at(1).first->setEnabled(false);
-      m_buttonsVector.at(32).first->setEnabled(false);
+      m_buttonsVector.at(max_letter_num).first->setEnabled(false);
     } else {
       m_buttonsVector.at(letter_num).first->setEnabled(true);
       m_buttonsVector.at(letter_num - 1).first->setEnabled(false);
+      m_buttonsVector.at(letter_num + 1).first->setEnabled(false);
+    }
+  } else {  // dec
+    if (letter_num == 0) {
+      letter_num = max_letter_num;
+      m_buttonsVector.at(letter_num).first->setEnabled(true);
+      m_buttonsVector.at(0).first->setEnabled(false);
+    } else {
+      letter_num--;
+      qDebug() << letter_num;
+      m_buttonsVector.at(letter_num).first->setEnabled(true);
       m_buttonsVector.at(letter_num + 1).first->setEnabled(false);
     }
   }
@@ -98,3 +116,5 @@ void MainWindow::ShowMessage(QString title, QString message,
 void MainWindow::ShowError(QString title, QString message) {
   ShowMessage(title, message, QMessageBox::Critical);
 }
+
+void MainWindow::on_pushButtonClear_clicked() { ui->lineEdit->clear(); }

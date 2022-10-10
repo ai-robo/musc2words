@@ -36,5 +36,6 @@ class MainWindow : public QMainWindow {
   void showRequest(const QString& s);
   void processError(const QString& s);
   void processTimeout(const QString& s);
+  void on_pushButtonClear_clicked();
 };
 #endif  // MAINWINDOW_H
